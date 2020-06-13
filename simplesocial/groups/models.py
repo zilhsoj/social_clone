@@ -1,7 +1,7 @@
 from django.db import models
 # slugify changes to url format
 from django.utils.text import slugify
-
+from django.urls import reverse
 # link embedding
 import misaka
 # Create your models here.
@@ -20,7 +20,7 @@ class Group(models.Model):
     slug = models.SlugField(allow_unicode=True, unique=True)
     description = models.TextField(blank=True, default='')
     description_html = models.TextField(blank=True, editable=False, default='')
-    memebers = models.ManyToManyField(user, through='GroupMember')
+    members = models.ManyToManyField(User, through='GroupMember')
 
     def __str__(self):
         return self.name
@@ -30,7 +30,7 @@ class Group(models.Model):
         self.description_html=misaka.html(self.description)
         super().save(*args, **kwargs)
 
-    def get_absolute_url():
+    def get_absolute_url(self):
         return reverse('groups:single', kwargs={'slug':self.slug})
 
     class Meta:
@@ -39,8 +39,8 @@ class Group(models.Model):
 
 class GroupMember(models.Model):
 
-    group = models.ForeignKey(Group, related_name='memberships')
-    user = models.ForeignKey(User, related_name='user_groups')
+    group = models.ForeignKey(Group, related_name='memberships', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user_groups', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.username
